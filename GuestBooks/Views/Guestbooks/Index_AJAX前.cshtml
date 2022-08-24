@@ -1,0 +1,145 @@
+﻿@model GuestBooks.ViewModels.GuestbooksViewModel
+
+@{
+    @*載入新增留言頁面*@
+ViewBag.Title = "Index";
+}
+<div id="CreateData">
+    @Html.Action("Create")
+</div>
+<h2>留言板</h2>
+@*建立搜尋所需的表單*@
+@using (Html.BeginForm("Index", "Guestbooks", FormMethod.Get))
+{
+    <table>
+        <tr>
+            <td>
+                @Html.LabelFor(m=>m.Search)
+            </td>
+            <td>
+                @Html.TextBoxFor(m=>m.Search)                
+            </td>
+            <td>
+                <input type="submit" value="搜尋"/>
+            </td>
+        </tr>
+    </table>
+
+}
+<table>
+    @*如果資料庫中不是零筆資料，顯示資料，並列出新增、刪除、修改連結*@
+    @if (!Model.DataList.Count.Equals(0))
+    {
+        foreach (var item in Model.DataList)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayNameFor(m => m.DataList[0].Name)
+                </td>
+                <td>
+                    @item.Name
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    @Html.DisplayNameFor(m => m.DataList[0].CreateTime)
+                </td>
+                <td>
+                    @item.CreateTime
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    @Html.DisplayNameFor(m => m.DataList[0].Content)
+                </td>
+                <td colspan="3">
+                    @item.Content
+                </td>
+            </tr>         
+            <tr>
+                <td>
+                    @Html.DisplayNameFor(m => m.DataList[0].Reply)
+                </td>
+                <td colspan="3">
+                    @item.Reply
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    @Html.DisplayNameFor(m => m.DataList[0].ReplyTime)
+                </td>
+                <td>
+                    @item.ReplyTime
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    @Html.ActionLink("修改留言", "Edit", new {Id=item.Id})
+                    @Html.ActionLink("回覆留言", "Reply", new {Id=item.Id})
+                    @Html.ActionLink("刪除留言", "Delete", new {Id=item.Id})
+                </td>
+            </tr>
+
+        }
+
+
+
+    }
+    @*如果資料庫中沒有紀錄，則印出"資料庫內查無此資料"*@
+    else
+    {
+        <tr>
+            <td colspan="4">
+                資料庫內查無此資料
+
+            </td>
+        </tr>
+
+    }
+    <tr>
+        <td>
+            @*若目前所在頁數>1，則顯示上衣頁與最前頁的按鈕*@
+            @if (Model.Paging.NowPage > 1)
+            {
+                @Html.ActionLink("<<", "Index", new {Page = 1,Search = Model.Search})
+                @Html.ActionLink("<","Index", new { Page = Model.Paging.NowPage-1,Search = Model.Search})
+            }
+        </td>
+        <td>
+            @*顯示當前頁述前後各5頁的頁數*@
+            @for (var page = (Model.Paging.NowPage - 6); page < (Model.Paging.NowPage + 6); page++)
+            {
+                if ((page > 0) && (page <= Model.Paging.MaxPage))
+                {
+                    if (page == Model.Paging.NowPage)
+                    {
+                        <b>@page</b>
+                    }
+                    else
+                    {
+                        @Html.ActionLink(page.ToString(), "Index", new { Page=page,Search=Model.Search})
+                    }
+
+                }
+            }
+        </td>
+        <td>
+            @*若目前所在頁數小於總頁數，則顯示下一頁與最後一夜的按鈕*@
+            @if (Model.Paging.NowPage < Model.Paging.MaxPage)
+            {
+                @Html.ActionLink(">", "Index", new { Page = Model.Paging.NowPage + 1, Search = Model.Search })
+                @Html.ActionLink(">>", "Index", new{Page = Model.Paging.MaxPage, Search = Model.Search})
+            }
+        </td>
+    </tr>
+</table>
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+@*匯入驗證欄位所需的javascript*@
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+}
+

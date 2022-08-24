@@ -1,0 +1,52 @@
+﻿@model GuestBooks.Models.Guestbooks
+
+@{
+    ViewBag.Title = "修改留言";
+}
+@*匯入所需的JavaScript*@
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval.js")
+
+}
+
+
+@using (Html.BeginForm())
+{
+    <h3>修改留言</h3>
+    @*建立修改留言表格*@
+    <table>
+        <tr>
+            <td>
+                @Html.LabelFor(m => m.Name)
+            </td>
+            <td>
+                @Html.TextBoxFor(m => m.Name)
+                @Html.ValidationMessageFor(m => m.Name)
+            </td>
+        </tr>
+        <tr>
+            <td>
+                @Html.LabelFor(m => m.Content)
+            </td>
+            <td>
+                @Html.TextBoxFor(m => m.Content)
+                @Html.ValidationMessageFor(m => m.Content)
+            </td>
+        </tr>
+    </table>
+    @*判斷是否有人回復，無人回復，即可修改*@
+    if (Model.Reply == null)
+    {
+        <input type="submit" value="修改留言" />
+    }
+    else
+    {
+        <text>此留言已回復無法修改，請</text>
+        @Html.ActionLink("返回列表","Index")
+
+    }
+}
+
+
+
