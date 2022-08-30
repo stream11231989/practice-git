@@ -20,7 +20,6 @@ namespace GuestBooks.ViewModels
         [DisplayName("確認密碼")]
         [Compare("Passeord", ErrorMessage ="兩次密碼輸入不一致!")]
         [Required(ErrorMessage ="請輸入確認密碼")]
-
         public string PasswordCheck { get; set; }
     }
 }

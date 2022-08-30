@@ -103,7 +103,7 @@ namespace GuestBooks.Services
             return Data;
         }
         #endregion
-        #region
+        #region 帳號註冊重覆確認
         //確認要註冊帳號是否有被註冊過的方法
         public bool AccountCheck(string Account)
         {
@@ -114,7 +114,55 @@ namespace GuestBooks.Services
             //回傳結果
             return result;
         }
-
         #endregion
+
+        #region 信箱驗證
+        //信箱驗證碼驗證方法
+        public string EmailValidate(string Account,string AuthCode)
+        {
+            //取得傳入帳號的會員資料
+            Members ValidateMember = GetDataByAccount(Account);
+
+            //宣告驗證後訊息字串
+            string ValidateStr = string.Empty;
+            if(ValidateMember != null)
+            {
+                //判斷傳入驗證碼與資料庫是否相同
+                if(ValidateMember.AuthCode == AuthCode)
+                {
+                    //將資料庫中的驗證碼設為空值
+                    //sql更新語法
+                    string sql = $@" update Mebers set Authcode = {string.Empty} where Account = '{Account}'";
+                    try
+                    {
+                        conn.Open();
+                        SqlCommand cmd = new SqlCommand(sql, conn);
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception e)
+                    {
+                        throw new Exception(e.Message.ToString());
+                    }
+                    finally
+                    {
+                        conn.Close();
+                    }
+                    ValidateStr = "帳號信箱驗證成功，現在可以登入了";
+                }
+                else
+                {
+                    ValidateStr = "驗證碼錯誤，請重新確認或再次註冊";
+                }              
+            }
+            else
+            {
+                ValidateStr = "傳送資料錯誤，請重新確認或再註冊";
+            }
+            //回傳驗證訊息
+            return ValidateStr;
+        }
+        #endregion
+
+
     }
 }
