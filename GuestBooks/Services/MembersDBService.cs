@@ -22,7 +22,8 @@ namespace GuestBooks.Services
             //將密碼HASH過
             newMember.Password = HashPassword(newMember.Password);
             //sql新增語法 //IsAdmin預設為0
-            string sql = $@" INSERT INTO Members (Account,Password,Name,Email,Authcode,IsAdmin) VALUES ('{newMember.Account}','{newMember.Password}','{newMember.Name}','{newMember.Email}','{newMember.AuthCode}','0')";
+            string sql = $@" INSERT INTO Members (Account,Password,Name,Email,AuthCode,IsAdmin) VALUES 
+('{newMember.Account}','{newMember.Password}','{newMember.Name}','{newMember.Email}','{newMember.AuthCode}','0') ";
             //確保程式部會因執行錯誤而中斷
             try
             {
@@ -67,13 +68,13 @@ namespace GuestBooks.Services
 
         #endregion
 
-        #region
+        #region 查詢一筆資料
         //藉由帳號取得單筆資料的方法
         private Members GetDataByAccount(string Account)
         {
             Members Data = new Members();
             //sql
-            string sql = $@" select * from Members where Account = {Account} ";
+            string sql = $@" select * from Members where Account = '{Account}' ";
             //確保程式不會因執行錯誤而中斷
             try
             {
@@ -132,7 +133,7 @@ namespace GuestBooks.Services
                 {
                     //將資料庫中的驗證碼設為空值
                     //sql更新語法
-                    string sql = $@" update Mebers set Authcode = {string.Empty} where Account = '{Account}'";
+                    string sql = $@" update Members set AuthCode = '{string.Empty}' where Account = '{Account}' ";
                     try
                     {
                         conn.Open();

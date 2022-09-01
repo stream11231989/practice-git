@@ -8,12 +8,12 @@ namespace GuestBooks.Services
 {
     public class MailService
     {
-        private string gmail_account = " ";
-        private string gmail_password = " ";
-        private string gmail_Email = " ";
+        private string gmail_account = "testforasp123@gmail.com";
+        private string gmail_password = "fpjmpplbokvnolia";
+        private string gmail_mail = "testforasp123@gmail.com";
 
         #region 寄會員驗證信
-        public string GetValidaeCode()
+        public string GetValidateCode()
         {
             //設定驗證碼字元的陣列
             string[] Code = {"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z",
@@ -42,11 +42,11 @@ namespace GuestBooks.Services
         }
 
         //寄驗證新的方法
-        public void SendRegisterMail(string MailBody,string ToMail)
+        public void SendRegisterMail(string MailBody, string ToEmail)
         {
-            //建立寄信用Smtp物件，這裡用Gmail為例
+            //建立寄信用Smtp物件，這裡使用Gmail為例
             SmtpClient SmtpServer = new SmtpClient("smtp.gmail.com");
-            //設定使用的port，這裡設定Gmail所使用的Port
+            //設定使用的Port，這裡設定Gmail所使用的
             SmtpServer.Port = 587;
             //建立使用者憑據，這裡要設定您的Gmail帳戶
             SmtpServer.Credentials = new System.Net.NetworkCredential(gmail_account, gmail_password);
@@ -55,9 +55,9 @@ namespace GuestBooks.Services
             //宣告信件內容物件
             MailMessage mail = new MailMessage();
             //設定來源信箱
-            mail.From = new MailAddress(gmail_Email);
+            mail.From = new MailAddress(gmail_mail);
             //設定收信者信箱
-            mail.To.Add(ToMail);
+            mail.To.Add(ToEmail);
             //設定信件主旨
             mail.Subject = "會員註冊確認信";
             //設定信件內容

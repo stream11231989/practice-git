@@ -32,6 +32,8 @@ namespace GuestBooks.Controllers
             return View();
         }
 
+
+       
         //傳入註冊資料的Action
         [HttpPost]
         //設定此Action只接受POST資料傳入
@@ -43,37 +45,41 @@ namespace GuestBooks.Controllers
                 //將頁面資料中的密碼欄位填入
                 RegisterMember.newMember.Password = RegisterMember.Password;
                 //取得信箱驗證碼
-                String AuthCode = mailService.GetValidaeCode();
+                string AuthCode = mailService.GetValidateCode();
                 //將信箱驗證碼填入
                 RegisterMember.newMember.AuthCode = AuthCode;
-                //呼叫Service註冊新會員
+                //呼叫Serrvice註冊新會員
                 membersService.Register(RegisterMember.newMember);
                 //取得寫好的驗證信範本內容
-                string TempMail = System.IO.File.ReadAllText(Server.MapPath("~/View/Shared/RegisterEmailTemplate.html"));
+                string TempMail = System.IO.File.ReadAllText(
+                    Server.MapPath("~/Views/Shared/RegisterEmailTemplate.html"));
                 //宣告Email驗證用的Url
                 UriBuilder ValidateUrl = new UriBuilder(Request.Url)
                 {
-                    Path = Url.Action("EmailValidate", "Members", new
+                    Path = Url.Action("EmailValidate", "Members"
+                    , new
                     {
                         Account = RegisterMember.newMember.Account,
                         AuthCode = AuthCode
                     })
                 };
 
-
-                //藉由Service將使用者資料填入到驗證信範本中
+                //藉由Service將使用者資料填入驗證信範本中
                 string MailBody = mailService.GetRegisterMailBody(TempMail, RegisterMember.newMember.Name, ValidateUrl.ToString().Replace("%3F", "?"));
                 //呼叫Service寄出驗證信
                 mailService.SendRegisterMail(MailBody, RegisterMember.newMember.Email);
                 //用TempData儲存註冊訊息
                 TempData["RegisterState"] = "註冊成功，請去收信以驗證Email";
+                //重新導向頁面
                 return RedirectToAction("RegisterResult");
-
             }
             //未經驗證清空密碼相關欄位
             RegisterMember.Password = null;
             RegisterMember.PasswordCheck = null;
+            //將資料回填至View中
             return View(RegisterMember);
+
+
         }
 
         //註冊結果顯示頁面
@@ -99,6 +105,8 @@ namespace GuestBooks.Controllers
 
 
         #endregion
+
+       
 
     }
 }
