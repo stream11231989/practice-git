@@ -83,3 +83,4 @@ D:\作品集\GuestBooks\GuestBooks\obj\Debug\GuestBooks.csproj.CoreCompileInputs
 D:\作品集\GuestBooks\GuestBooks\obj\Debug\GuestBooks.csproj.CopyComplete
 D:\作品集\GuestBooks\GuestBooks\obj\Debug\GuestBooks.dll
 D:\作品集\GuestBooks\GuestBooks\obj\Debug\GuestBooks.pdb
+D:\作品集\GuestBooks\GuestBooks\bin\jose-jwt.dll

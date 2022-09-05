@@ -1,9 +1,11 @@
-﻿using GuestBooks.Services;
+﻿using GuestBooks.Security;
+using GuestBooks.Services;
 using GuestBooks.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.Web.Configuration;
 using System.Web.Mvc;
 
 namespace GuestBooks.Controllers
@@ -106,7 +108,77 @@ namespace GuestBooks.Controllers
 
         #endregion
 
-       
 
+        #region 登入
+        //登入一開始載入畫面
+        public ActionResult Login()
+        {
+            //判斷使用者是否已經登入驗證
+            if (User.Identity.IsAuthenticated)
+                return RedirectToAction("Index", "Guestbooks");//以登入則重心導向
+            return View();//否則進入登入畫面
+        }
+
+        //傳入登入資料的Action
+        [HttpPost] //設定此Action只接受頁面POST資料傳入
+        public ActionResult Login(MembersLoginViewModel LoginMember)
+        {
+            //使用Service裡的方法來驗證登入的帳號密碼
+            string ValidateStr = membersService.LoginCheck(LoginMember.Account, LoginMember.Password);
+            //判斷驗證後結果是否有錯誤訊息
+            if (String.IsNullOrEmpty(ValidateStr))
+            {
+                //無錯誤訊息，則登入
+                //先藉由Service取得登入者角色資料
+                string RoleData = membersService.GetRole(LoginMember.Account);
+                //設定JWT
+                JwtService jwtService = new JwtService();
+                //從Web.Config撈出資料
+                //Cookie名稱
+                string cookieName = WebConfigurationManager.AppSettings["CookieName"].ToString();
+                string Token = jwtService.GenerateToken(LoginMember.Account, RoleData);
+                ////產生一個Cookie
+                HttpCookie cookie = new HttpCookie(cookieName);
+                //設定單值
+                cookie.Value = Server.UrlEncode(Token);
+                //寫到用戶端
+                Response.Cookies.Add(cookie);
+                //設定Cookie期限
+                Response.Cookies[cookieName].Expires = DateTime.Now.AddMinutes(Convert.ToInt32(WebConfigurationManager.AppSettings["ExpireMinutes"]));
+                //重新導向頁面
+                return RedirectToAction("Index", "Guestbooks");
+            }
+            else
+            {
+                //有驗證錯誤訊息，加入頁面模型中
+                ModelState.AddModelError("", ValidateStr);
+                //將資料回填至View中
+                return View(LoginMember);
+            }
+        }
+
+        #endregion
+
+
+        #region 登出
+        //登出Action
+        [Authorize] //設定此Action需登入
+        public ActionResult Logout()
+        {
+            //使用者登出
+            //Cookie 名稱
+            string cookieName = WebConfigurationManager.AppSettings["CookieName"].ToString();
+            //清除Cookie
+            HttpCookie cookie = new HttpCookie(cookieName);
+            cookie.Expires = DateTime.Now.AddDays(-1);
+            cookie.Values.Clear();
+            Response.Cookies.Set(cookie);
+            //重心導向至登入Action
+            return RedirectToAction("Login");
+
+        }
+
+
+        #endregion
     }
 }

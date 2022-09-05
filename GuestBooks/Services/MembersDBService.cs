@@ -104,6 +104,7 @@ namespace GuestBooks.Services
             return Data;
         }
         #endregion
+
         #region 帳號註冊重覆確認
         //確認要註冊帳號是否有被註冊過的方法
         public bool AccountCheck(string Account)
@@ -164,6 +165,70 @@ namespace GuestBooks.Services
         }
         #endregion
 
+        #region 登入確認
+        public string LoginCheck(string Account, string Password)
+        {
+            //取得傳入帳號的會員資料
+
+            Members LoginMember = GetDataByAccount(Account);
+            
+            //判斷是否有此會員
+            if (LoginMember != null)
+            {
+                //判斷是否有經過信箱驗證，有經驗證，驗證碼欄位會被清空
+                if (string.IsNullOrWhiteSpace(LoginMember.AuthCode))
+                {
+                    //進行帳密確認
+                    if(PasswordCheck(LoginMember, Password))
+                    {
+                        return "";
+                    }
+                    else
+                    {
+                        return "密碼輸入錯誤";
+                    }
+                }
+                else
+                {
+                    return "此帳號尚未經過Email驗證";
+                }
+            }
+            else
+            {
+                return "無此會員帳號，請去註冊";
+            }
+        }
+
+        #endregion
+
+        #region
+        public bool PasswordCheck(Members CheckMember, string Password)
+        {
+            //判斷資料庫裡的密碼資料與傳入密碼資料HASH後是否一樣
+            bool result = CheckMember.Password.Equals(HashPassword(Password));
+            //回傳結果
+            return result;
+        }
+
+        #endregion
+
+        #region 取得腳色資料
+        //取得會員的權限腳色資料
+        public string GetRole(string Account)
+        {
+            //宣告初始腳色字串
+            string Role = "User";
+            //取得傳入帳號的會員資料
+            Members LoginMember = GetDataByAccount(Account);
+            if (LoginMember.IsAdmin)
+            {
+                Role += ",Admin";//添加Admin
+            }
+            //回傳最後結果
+            return Role;
+        }
+
+        #endregion
 
     }
 }

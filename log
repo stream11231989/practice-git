@@ -1,0 +1,23 @@
+[33mcommit b294b0edfc10c2f5c79a5e91cb011c94c52aaba4[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m)[m
+Author: Bill Lin <stream1123@hotmail.com>
+Date:   Thu Sep 1 20:17:31 2022 +0800
+
+    Email Validation Finish
+
+[33mcommit b77be327a1629d29e039d4f90d13d92878cdff28[m
+Author: Bill Lin <stream1123@hotmail.com>
+Date:   Tue Aug 30 08:12:41 2022 +0800
+
+    Email Vadition
+
+[33mcommit 9ab6e3643031fc8cf675a60cd9ad4191ab32c78a[m
+Author: Bill Lin <stream1123@hotmail.com>
+Date:   Fri Aug 26 07:58:25 2022 +0800
+
+    Account CHECK
+
+[33mcommit 9d9b33b96a579e1a67e9867b8fbea5e4f0a1bf6c[m
+Author: Bill Lin <stream1123@hotmail.com>
+Date:   Thu Aug 25 07:42:03 2022 +0800
+
+    init commit
