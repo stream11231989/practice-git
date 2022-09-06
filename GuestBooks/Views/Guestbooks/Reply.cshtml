@@ -2,21 +2,18 @@
 @{
     ViewBag.Title = "回覆留言";
 }
+@section scripts
+{
+    @Scripts.Render("~/bundles/jqueryval.js")
+
+}
 @*建立回覆留言所需的表單*@
 @using (Html.BeginForm())
 {
     <h3>回覆留言</h3>
     @*建立回覆留言所需的表單*@
     <table>
-        <tr>
-            <td>
-                @Html.LabelFor(m => m.Name)
-            </td>
-            <td>
-                @Html.TextBoxFor(m => m.Name)
-                @Html.ValidationMessageFor(m => m.Name)
-            </td>
-        </tr>
+
         <tr>
             <td>
                 @Html.LabelFor(m => m.Content)
@@ -44,12 +41,8 @@
     else
     {
         <text>此留言已回覆，請</text>
-        @Html.ActionLink("返回列表","Index")
+        @Html.ActionLink("返回列表", "Index")
     }
-    @section scripts
-        {
-        @Scripts.Render("~/bundles/jqueryval.js")
-        
-        }
+
 }
 

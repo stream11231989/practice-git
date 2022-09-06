@@ -17,6 +17,7 @@ namespace GuestBooks.Services
         //建立與資料庫的連線
         private readonly SqlConnection conn = new SqlConnection(cnstr);
 
+        #region 
         public List<Models.Guestbooks> GetDataList()
         {
             List<Models.Guestbooks> DataList = new List<Models.Guestbooks>();
@@ -36,7 +37,7 @@ namespace GuestBooks.Services
                 {
                     Models.Guestbooks Data = new Models.Guestbooks();
                     Data.Id = Convert.ToInt32(dr["Id"]);
-                    Data.Name = dr["Name"].ToString();
+                    Data.Account = dr["Account"].ToString();
                     Data.Content = dr["Content"].ToString();
                     Data.CreateTime = Convert.ToDateTime(dr["CreateTime"]);
                     //確定此留言是否回復，且不允許空白
@@ -61,13 +62,92 @@ namespace GuestBooks.Services
             }
             return DataList;
         }
-        #region
+        #endregion
+        #region 查詢陣列資料
+        //根據分頁以及搜尋來取得陣列資料的方法
+
+        //找陣列資料中的Search類別(見GuestbooksViewModels)
+        public List<Guestbooks> GetDataList(ForPaging Paging, string Search)
+        {
+            List<Guestbooks> DataList = new List<Guestbooks>();
+            //sql語法
+            if (!string.IsNullOrWhiteSpace(Search))
+            {
+                //有搜尋條件時
+                SetMaxPaging(Paging, Search);
+                DataList = GetAllDataList(Paging, Search);
+            }
+            else
+            {
+                //無搜尋條件時
+                SetMaxPaging(Paging);
+                DataList = GetAllDataList(Paging);
+            }
+
+
+            //sql語法(單Search，未導入分業功能)
+            ////string sql = string.Empty;
+            ////if (!string.IsNullOrWhiteSpace(Search))
+            ////{
+            ////    //有搜尋條件時
+            ////    sql = $@"SELECT * FROM GuestBooks WHERE Name LIKE '%{Search}%' OR Content LIKE '%{Search}%' OR Reply LIKE'%{Search}%';";
+            ////}
+            ////else
+            ////{
+            ////    //無搜尋條件時
+            ////    sql = $@"SELECT * FROM GuestBooks;";
+            ////}
+            //////確保程式部會因為執行錯誤而整個中斷
+            ////try
+            ////{
+            ////    //開啟資料庫
+            ////    conn.Open();
+            ////    //執行sql指令
+            ////    SqlCommand cmd = new SqlCommand(sql, conn);
+            ////    //取得sql資料
+            ////    SqlDataReader dr = cmd.ExecuteReader();
+            ////    while (dr.Read())//獲取下一筆資料直到沒有資料
+            ////    {
+            ////        Guestbooks Data = new Guestbooks();
+            ////        Data.Id = Convert.ToInt32(dr["Id"]);
+            ////        Data.Name = dr["Name"].ToString();
+            ////        Data.Content = dr["Content"].ToString();
+            ////        Data.CreateTime = Convert.ToDateTime(dr["CreateTime"]);
+            ////        //確定此則留言是否回復，且不允許空白
+            ////        //因C#是強型別語法，所以轉換時DataTime不允許存取Null
+            ////        if (!dr["ReplyTime"].Equals(DBNull.Value))
+            ////        {
+            ////            Data.Reply = dr["Reply"].ToString();
+            ////            Data.ReplyTime = Convert.ToDateTime(dr["ReplyTime"]);
+
+            ////        }
+            ////        DataList.Add(Data);
+
+            ////    }
+            ////}
+            ////catch(Exception e)
+            ////{
+            ////    throw new Exception(e.Message.ToString());
+            ////}
+            ////finally
+            ////{
+            ////    //關閉資料庫
+            ////    conn.Close();
+            ////}
+            return DataList;
+
+        }
+
+        #endregion
+
+
+        #region 新增資料
         //新增方法
         public void InsertGuestbooks(Guestbooks newData)
         {
             //sql新增語法
             //設定新增時間為現在
-            string sql = $@" INSERT INTO GuestBooks(Name,Content,CreateTime) VALUES('{newData.Name}','{newData.Content}',
+            string sql = $@" INSERT INTO GuestBooks(Account,Content,CreateTime) VALUES('{newData.Account}','{newData.Content}',
                                                                         '{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}');";
             //確保程式不會因執行錯誤而失敗
             try
@@ -104,7 +184,7 @@ namespace GuestBooks.Services
         {
             Guestbooks Data = new Guestbooks();
             //sql語法
-            string sql = $@" SELECT * FROM GuestBooks WHERE Id = {Id};";
+            string sql = $@" SELECT * FROM GuestBooks m inner join Members d on m.Account = d.Account WHERE Id = {Id};";
             //確保程式部會因為執行錯誤而中斷
             try
             {
@@ -116,7 +196,7 @@ namespace GuestBooks.Services
                 SqlDataReader dr = cmd.ExecuteReader();
                 dr.Read();
                 Data.Id = Convert.ToInt32(dr["Id"]);
-                Data.Name = dr["Name"].ToString();
+                Data.Account = dr["Account"].ToString();
                 Data.Content = dr["Content"].ToString();
                 Data.CreateTime = Convert.ToDateTime(dr["CreateTime"]);
                 //確定此則留言是否回覆，且不允許空白
@@ -125,6 +205,8 @@ namespace GuestBooks.Services
                     Data.Reply = dr["Reply"].ToString();
                     Data.ReplyTime = Convert.ToDateTime(dr["ReplyTime"]);
                 }
+                //會員資料
+                Data.Member.Name = dr["Name"].ToString();
             }
             catch (Exception e)
             {
@@ -144,7 +226,7 @@ namespace GuestBooks.Services
         public void UpdateGuestbooks(Guestbooks UpdateData)
         {
             //sql修改語法
-            string sql = $@" UPDATE GuestBooks SET Name = '{UpdateData.Name}',Content = '{UpdateData.Content}' WHERE Id = '{UpdateData.Id}'";
+            string sql = $@" UPDATE GuestBooks SET Account = '{UpdateData.Account}',Content = '{UpdateData.Content}' WHERE Id = '{UpdateData.Id}'";
 
             //確保程式部會因執行錯誤而整個中斷
             try
@@ -237,82 +319,7 @@ namespace GuestBooks.Services
         }
 
         #endregion
-        #region 查詢陣列資料
-        //根據分頁以及搜尋來取得陣列資料的方法
 
-        //找陣列資料中的Search類別(見GuestbooksViewModels)
-        public List<Guestbooks> GetDataList(ForPaging Paging, string Search)
-        {
-            List<Guestbooks> DataList = new List<Guestbooks>();
-            //sql語法
-            if (!string.IsNullOrWhiteSpace(Search))
-            {
-                //有搜尋條件時
-                SetMaxPaging(Paging, Search);
-                DataList = GetAllDataList(Paging, Search);
-            }
-            else
-            {
-                //無搜尋條件時
-                SetMaxPaging(Paging);
-                DataList = GetAllDataList(Paging);
-            }
-
-
-            //sql語法(單Search，未導入分業功能)
-            ////string sql = string.Empty;
-            ////if (!string.IsNullOrWhiteSpace(Search))
-            ////{
-            ////    //有搜尋條件時
-            ////    sql = $@"SELECT * FROM GuestBooks WHERE Name LIKE '%{Search}%' OR Content LIKE '%{Search}%' OR Reply LIKE'%{Search}%';";
-            ////}
-            ////else
-            ////{
-            ////    //無搜尋條件時
-            ////    sql = $@"SELECT * FROM GuestBooks;";
-            ////}
-            //////確保程式部會因為執行錯誤而整個中斷
-            ////try
-            ////{
-            ////    //開啟資料庫
-            ////    conn.Open();
-            ////    //執行sql指令
-            ////    SqlCommand cmd = new SqlCommand(sql, conn);
-            ////    //取得sql資料
-            ////    SqlDataReader dr = cmd.ExecuteReader();
-            ////    while (dr.Read())//獲取下一筆資料直到沒有資料
-            ////    {
-            ////        Guestbooks Data = new Guestbooks();
-            ////        Data.Id = Convert.ToInt32(dr["Id"]);
-            ////        Data.Name = dr["Name"].ToString();
-            ////        Data.Content = dr["Content"].ToString();
-            ////        Data.CreateTime = Convert.ToDateTime(dr["CreateTime"]);
-            ////        //確定此則留言是否回復，且不允許空白
-            ////        //因C#是強型別語法，所以轉換時DataTime不允許存取Null
-            ////        if (!dr["ReplyTime"].Equals(DBNull.Value))
-            ////        {
-            ////            Data.Reply = dr["Reply"].ToString();
-            ////            Data.ReplyTime = Convert.ToDateTime(dr["ReplyTime"]);
-
-            ////        }
-            ////        DataList.Add(Data);
-
-            ////    }
-            ////}
-            ////catch(Exception e)
-            ////{
-            ////    throw new Exception(e.Message.ToString());
-            ////}
-            ////finally
-            ////{
-            ////    //關閉資料庫
-            ////    conn.Close();
-            ////}
-            return DataList;
-
-        }
-
-        #endregion
 
 
         //無搜尋值得搜尋資料方法
@@ -360,7 +367,7 @@ namespace GuestBooks.Services
             //計算列數
             int Row = 0;
             //sql語法
-            string sql = $@" SELECT * FROM GuestBooks WHERE Name LIKE '%{Search}%'  OR Content LIKE '%{Search}%' OR Reply LIKE '%{Search}%' ";
+            string sql = $@" SELECT * FROM GuestBooks WHERE Content LIKE '%{Search}%' OR Reply LIKE '%{Search}%' ";
             //string sql = $@" select * from Guestbooks Where Name like '%{Search}%'  or Content like '%{Search}%' or Reply like '%{Search}%' ";
             //確保程式部會因為執行錯誤而整個中斷
             try
@@ -400,9 +407,9 @@ namespace GuestBooks.Services
             //宣告要回傳的搜尋資料為資料庫中的Guestbooks資料表
             List<Guestbooks> DataList = new List<Guestbooks>();
             //sql語法
-            string sql = $@" SELECT * FROM (SELECT row_number() OVER(order by Id) AS sort,* FROM Guestbooks ) m
-                       WHERE m.sort BETWEEN {(paging.NowPage - 1) * paging.ItemNum + 1} AND {paging.NowPage * paging.ItemNum}; ";
-
+            string sql = $@" select m.*,d.Name,d.IsAdmin from (select row_number() over(order by Id) as sort,* from Guestbooks ) m
+inner join Members d on m.Account = d.Account
+Where m.sort Between {(paging.NowPage - 1) * paging.ItemNum + 1} and {paging.NowPage * paging.ItemNum} ";
 
             //string sql = $@" select * from (select row_number() over(order by Id) as sort,* from Guestbooks ) m
             //           Where m.sort Between {(paging.NowPage - 1) * paging.ItemNum + 1} and {paging.NowPage * paging.ItemNum} ";
@@ -419,7 +426,7 @@ namespace GuestBooks.Services
                 {
                     Guestbooks Data = new Guestbooks();
                     Data.Id = Convert.ToInt32(dr["Id"]);
-                    Data.Name = dr["Name"].ToString();
+                    Data.Account = dr["Account"].ToString();
                     Data.Content = dr["Content"].ToString();
                     Data.CreateTime = Convert.ToDateTime(dr["CreateTime"]);
                     //確定此則留言是否回復，且不允許空白
@@ -429,6 +436,8 @@ namespace GuestBooks.Services
                         Data.Reply = dr["Reply"].ToString();
                         Data.ReplyTime = Convert.ToDateTime(dr["ReplyTime"]);
                     }
+                    //會員資料
+                    Data.Member.Name = dr["Name"].ToString();
                     DataList.Add(Data);
                 }
             }
@@ -450,10 +459,10 @@ namespace GuestBooks.Services
             //宣告要回傳的搜尋資料為資料庫中的Guestbooks資料表
             List<Guestbooks> DataList = new List<Guestbooks>();
             //sql語法
-            string sql = $@"SELECT * FROM (SELECT row_number() OVER (order by Id) AS sort, * FROM GuestBooks WHERE Name LIKE '%{Search}%' OR 
-                                                                                                             Content LIKE'%{Search}%' OR
-                                                                                                             Reply LIKE '%{Search}%' ) m WHERE m.sort BETWEEN
-                                          {(paging.NowPage - 1) * paging.ItemNum + 1} AND {paging.NowPage * paging.ItemNum}; ";
+            string sql = $@" select m.*,d.Name,d.IsAdmin from (select row_number() over(order by Id) as sort,* from Guestbooks where 
+Content like '%{Search}%' or Reply like '%{Search}%' ) m 
+inner join Members d on m.Account = d.Account
+Where m.sort Between {(paging.NowPage - 1) * paging.ItemNum + 1} and {paging.NowPage * paging.ItemNum} ";
             //確保程式不會因執行錯誤而整個中斷
             try
             {
@@ -467,7 +476,7 @@ namespace GuestBooks.Services
                 {
                     Guestbooks Data = new Guestbooks();
                     Data.Id = Convert.ToInt32(dr["Id"]);
-                    Data.Name = dr["Name"].ToString();
+                    Data.Account = dr["Account"].ToString();
                     Data.Content = dr["Content"].ToString();
                     Data.CreateTime = Convert.ToDateTime(dr["CreateTime"]);
                     //確定此則留言是否回復，且不允許空白
@@ -477,6 +486,8 @@ namespace GuestBooks.Services
                         Data.Reply = dr["Reply"].ToString();
                         Data.ReplyTime = Convert.ToDateTime(dr["ReplyTime"]);
                     }
+                    //會員資料
+                    Data.Member.Name = dr["Name"].ToString();
                     DataList.Add(Data);
                 }
             }

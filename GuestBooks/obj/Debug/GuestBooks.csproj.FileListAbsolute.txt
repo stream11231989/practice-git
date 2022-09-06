@@ -51,6 +51,7 @@ D:\作品集\GuestBooks\GuestBooks\bin\roslyn\vbc.rsp
 D:\作品集\GuestBooks\GuestBooks\bin\roslyn\VBCSCompiler.exe
 D:\作品集\GuestBooks\GuestBooks\bin\roslyn\VBCSCompiler.exe.config
 D:\作品集\GuestBooks\GuestBooks\bin\Antlr3.Runtime.dll
+D:\作品集\GuestBooks\GuestBooks\bin\jose-jwt.dll
 D:\作品集\GuestBooks\GuestBooks\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll
 D:\作品集\GuestBooks\GuestBooks\bin\Microsoft.Web.Infrastructure.dll
 D:\作品集\GuestBooks\GuestBooks\bin\Newtonsoft.Json.dll
@@ -83,4 +84,3 @@ D:\作品集\GuestBooks\GuestBooks\obj\Debug\GuestBooks.csproj.CoreCompileInputs
 D:\作品集\GuestBooks\GuestBooks\obj\Debug\GuestBooks.csproj.CopyComplete
 D:\作品集\GuestBooks\GuestBooks\obj\Debug\GuestBooks.dll
 D:\作品集\GuestBooks\GuestBooks\obj\Debug\GuestBooks.pdb
-D:\作品集\GuestBooks\GuestBooks\bin\jose-jwt.dll

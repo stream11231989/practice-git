@@ -33,10 +33,10 @@
             {
                 <tr>
                     <td>
-                        @Html.DisplayNameFor(m=>m.DataList[0].Name)
+                        @Html.DisplayNameFor(m=>m.DataList[0].Member.Name)
                     </td>
                     <td>
-                        @item.Name
+                        @item.Member.Name
                     </td>
                 </tr>
                 <tr>
@@ -71,11 +71,15 @@
                         @item.ReplyTime
                     </td>
                     <td colspan="2">
-                        @Html.ActionLink("修改留言", "Edit", new { Id=item.Id})
-                        @Html.ActionLink("回覆留言", "Reply", new {Id=item.Id})
-                        @Html.ActionLink("刪除留言", "Delete", new {Id=item.Id})
+                        @Html.ActionLink("修改留言", "Edit", new { Id = item.Id })
+                        @if (User.IsInRole("Admin"))
+                        {
+                            @Html.ActionLink("回覆留言", "Reply", new { Id = item.Id })
+                            @Html.ActionLink("刪除留言", "Delete", new { Id = item.Id })
+                        }
                     </td>
                 </tr>
+                
             }
 
         }
@@ -109,6 +113,7 @@
                 }
 
             </td>
+             <br />
             <td>
                 @*顯示當前頁數前後各五頁的頁數*@
                 @for(var page=(Model.Paging.NowPage - 6); page < (Model.Paging.NowPage + 6); page++)

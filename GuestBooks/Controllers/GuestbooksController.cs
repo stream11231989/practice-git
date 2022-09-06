@@ -65,11 +65,15 @@ namespace GuestBooks.Controllers
         }
 
         //新增傳入留言時的動作
+        [Authorize]//設定此Action需要登入
         [HttpPost]
         //設定此Action只接受頁面POST傳入
         //使用Binding的Include來定義只接受的欄位，用來避免傳入其他不相干直
-        public ActionResult Create([Bind(Include = "Name,Content")] Guestbooks Data)
+        public ActionResult Create([Bind(Include = "Content")] Guestbooks Data)
         {
+            //設定新增留言的留言者為登入者
+            Data.Account = User.Identity.Name;
+
             //使用Service來新增一筆資料
             GuestbookService.InsertGuestbooks(Data);
             //重新導向頁面致開始畫面
@@ -80,6 +84,7 @@ namespace GuestBooks.Controllers
 
         #region 修改留言
         //修改留言葉面要根據傳入的編號來決定要修改的資料
+        [Authorize]//設定此Action需登入
         public ActionResult Edit(int Id)
         {
             //藉由Service，取得頁面所需資料
@@ -87,16 +92,19 @@ namespace GuestBooks.Controllers
             return View(Data);
         }
         //修改留言傳入資料時的Action
+        [Authorize]//設定此Action需登入
         [HttpPost]//設定此Action只接受頁面Post傳入
         //使用Bind的Include來定義只接受的欄位，用來避免其他不相干值
-        public ActionResult Edit(int Id,[Bind(Include ="Name,Content")]
-        Guestbooks UpdateData)
+        public ActionResult Edit(int Id,[Bind(Include ="Content")]Guestbooks UpdateData)
         {
             //判斷修改資料是否可修改
             if (GuestbookService.CheckUpdate(Id))
             {
                 //將編號設定至修改資料中
                 UpdateData.Id = Id;
+                //設定修改留言的留言者為登入者
+                UpdateData.Account = User.Identity.Name;
+
                 //使用Service來修改資料
                 GuestbookService.UpdateGuestbooks(UpdateData);
                 //重新導向致開始頁面
@@ -109,41 +117,45 @@ namespace GuestBooks.Controllers
         }
         #endregion
 
+
         #region 回覆留言
-        //回覆留言頁面，要根據傳入Id來決定要回覆的資料
+        //回覆留言頁面要根據傳入編號來決定要回覆的資料
+        [Authorize(Roles = "Admin")] //設定此Action只有Admin角色才可使用
         public ActionResult Reply(int Id)
         {
-            //藉由Service，取得頁面所需資料
+            //取得頁面所需資料，藉由Service取得
             Guestbooks Data = GuestbookService.GetDataById(Id);
-            //將資料傳入view中
+            //將資料傳入View中
             return View(Data);
         }
 
-        //修改留言傳入資料後的Action
-        [HttpPost]//設定此Action只接受頁面Post傳入
-        //使用Bind的Include來定義只接受的欄位，用來避免其他不相干值
-        public ActionResult Reply(int Id, [Bind(Include ="Reply,ReplyTime")]Guestbooks ReplyData)
+        //修改留言傳入資料時的Action
+        [HttpPost] //設定此Action只接受頁面POST資料傳入
+                   //使用Bind的Inculde來定義只接受的欄位，用來避免傳入其他不相干值
+        [Authorize(Roles = "Admin")] //設定此Action只有Admin角色才可使用
+        public ActionResult Reply(int Id, [Bind(Include = "Reply,ReplyTime")] Guestbooks ReplyData)
         {
-            //判斷修改的資料是否可被修改
+            //修改資料的是否可修改判斷
             if (GuestbookService.CheckUpdate(Id))
             {
                 //將編號設定至回覆留言資料中
                 ReplyData.Id = Id;
                 //使用Service來回覆留言資料
                 GuestbookService.ReplyGuestbooks(ReplyData);
-                //重心導向頁面致開始畫面
+                //重新導向頁面至開始頁面
                 return RedirectToAction("Index");
             }
             else
             {
+                //重新導向頁面至開始頁面
                 return RedirectToAction("Index");
             }
-
         }
         #endregion
 
         #region 刪除留言
         //根據傳入的Id做資料刪除
+        [Authorize(Roles ="Admin")]//設定此Action只有Admin腳色才可以刪除
         public ActionResult Delete(int Id)
         {
             //使用Service做刪除資料
