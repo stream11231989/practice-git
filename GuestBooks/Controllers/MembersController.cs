@@ -180,5 +180,27 @@ namespace GuestBooks.Controllers
 
 
         #endregion
+
+        #region 修改密碼
+        [Authorize]
+        public ActionResult ChangePassword()
+        {
+            return View();
+        }
+
+        [Authorize]
+        [HttpPost]
+        public ActionResult ChangePassword(ChangePasswordViewModel ChangeData)
+        {
+            //判斷葉面資料是否經過驗證
+            if (ModelState.IsValid)
+            {
+                ViewData["ChangeState"] = membersService.ChangePassword(User.Identity.Name, ChangeData.Password, ChangeData.NewPassword);
+
+            }
+            return View();
+        }
+
+        #endregion
     }
 }

@@ -201,7 +201,7 @@ namespace GuestBooks.Services
 
         #endregion
 
-        #region
+        #region 密碼確認
         public bool PasswordCheck(Members CheckMember, string Password)
         {
             //判斷資料庫裡的密碼資料與傳入密碼資料HASH後是否一樣
@@ -230,5 +230,45 @@ namespace GuestBooks.Services
 
         #endregion
 
+        #region 變更密碼
+        //變更會員密碼方法，並傳回最後訊息
+        public string ChangePassword(string Account, string Password, string newPassword)
+        {
+            //取得傳入帳號的會員資料
+            Members LoginMember = GetDataByAccount(Account);
+            //確認舊密碼的正確性
+            if (PasswordCheck(LoginMember, Password))
+            {
+                //將新密碼HASH後寫入資料庫中
+                LoginMember.Password = HashPassword(newPassword);
+                //sql修改語法
+                string sql = $@" update Members set Password = '{LoginMember.Password}' where Account = '{Account}' ";
+                
+                try 
+                {
+                    conn.Open();
+                    SqlCommand cmd = new SqlCommand(sql, conn);
+                    cmd.ExecuteReader();
+                }
+                catch (Exception e)
+                {
+                    throw new Exception(e.Message.ToString());
+                }
+                finally
+                {
+                    conn.Close();
+                }
+                return "密碼修改成功";
+
+            }
+            else
+            {
+                return "舊密碼輸入錯誤";
+            }
+
+
+        }
+
+        #endregion
     }
 }
